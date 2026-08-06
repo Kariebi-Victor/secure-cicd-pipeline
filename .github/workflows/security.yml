@@ -61,14 +61,19 @@ jobs:
 
 
     steps:
-    - name: Pull Juice Shop Image 
-      run: docker pull bkimminich/juice-shop:latest 
+    - name: Checkout Repository 
+      uses: actions/checkout@v4
+
+    - name: Build Juice Shop Image 
+      run: |
+        docker pull bkimminich/juice-shop:latest
+        docker tag bkimminich/juice-shop:latest secure-cicd-juice-shop:latest
 
     - name: Scan Docker Image 
       uses: aquasecurity/trivy-action@v0.36.0
       with:
-        image-ref: bkimminich/juice-shop:latest
+        image-ref: secure-cicd-juice-shop:latest
         format: table
         severity: HIGH,CRITICAL
         exit-code: "1"
-        ignore-unfixed: true   
+        ignore-unfixed: true
