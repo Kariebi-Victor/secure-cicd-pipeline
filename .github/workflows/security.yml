@@ -100,21 +100,24 @@ jobs:
 
     steps: 
     - name: Start Juice Shop 
-      run: | 
-        docker run -d \
-          --name juice-shop \ 
-          -p 3000:3000 \
-          bkimminich/juice-shop:latest
+      run: docker run -d --name juice-shop -p 3000:3000 bkimminich/juice-shop:latest
     
     - name: Wait for Juice Shop
       run: |
         for i in {1..30}; do 
-          curl -f http://localhost:3000 && break
+          if curl -fsS http://localhost:3000 > /dev/null; then 
+            echo "Juice Shop ready"
+            exit 0
+          fi
           sleep 2
         done 
+
+        echo "Juice Shop failed to start"
+        docker logs juice-shop
+        exit 1
 
     - name: Run ZAP Baseline Scan 
       uses: zaproxy/action-baseline@v0.15.0
       with:
-        target: "http://host.docker.internal:3000"
+        target: "http://localhost:3000"
         fail_action: false 
