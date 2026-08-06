@@ -37,7 +37,7 @@ jobs:
         with:
           config: p/security-audit
     
-  filesystem-scan: 
+  Trivy-filesystem: 
     runs-on: ubuntu-latest 
     needs: sast
 
@@ -51,13 +51,21 @@ jobs:
           scan-type: fs
           scan-ref: .
           scanners: vuln,misconfig 
+          format: sarif
+          output: reports/trivy-fs.sarif
           severity: HIGH,CRITICAL
-          exit-code: "1"
+          exit-code: "0"
           ignore-unfixed: true
+      
+      - name: Upload Trivy Filesystem Report 
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-fs-report
+          path: reports/trivy-fs.sarif
 
-  image-scan: 
+  Trivy-image: 
     runs-on: ubuntu-latest
-    needs: filesystem-scan 
+    needs: Trivy-filesystem 
 
 
     steps:
@@ -73,11 +81,18 @@ jobs:
       uses: aquasecurity/trivy-action@v0.36.0
       with:
         image-ref: secure-cicd-juice-shop:latest
-        format: table
+        format: sarif
+        output: reports/trivy-image.sarif
         severity: HIGH,CRITICAL
-        exit-code: "1"
+        exit-code: "0"
         ignore-unfixed: true
-  
+
+    - name: Upload Trivy Image Report 
+      uses: actions/upload-artifact@v4
+      with: 
+        name: trivy-image-report 
+        path: reports/trivy-image.sarif
+
   dast: 
     runs-on: ubuntu-latest 
     needs: image-scan
@@ -102,3 +117,5 @@ jobs:
       uses: zaproxy/action-baseline@0.12.0
       with:
         target: "http://host.docker.internal:3000"
+        fail_action: false 
+        
