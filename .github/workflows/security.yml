@@ -95,7 +95,7 @@ jobs:
 
   dast: 
     runs-on: ubuntu-latest 
-    needs: image-scan
+    needs: Trivy-image
 
 
     steps: 
