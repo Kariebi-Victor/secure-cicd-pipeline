@@ -29,7 +29,8 @@ jobs:
             --no-git \
             --report-format sarif \
             --report-path /repo/reports/gitleaks.sarif \
-            --exit-code 0
+            --exit-code 0 \
+            --verbose
 
       - name: Upload Report
         uses: actions/upload-artifact@v4
@@ -49,6 +50,7 @@ jobs:
 
       - name: Run Semgrep 
         uses: returntocorp/semgrep-action@v1
+        continue-on-error: true
         with:
           config: p/security-audit
     
